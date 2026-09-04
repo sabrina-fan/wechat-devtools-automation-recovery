@@ -1,49 +1,49 @@
 # wechat-devtools-automation-recovery
 
-Diagnose and recover WeChat Mini Program DevTools automation when the build is fine but the automator cannot connect, times out, or pages go blank on real devices.
+构建没问题但自动化连不上、超时、真机白屏时，诊断并恢复微信小程序开发者工具的自动化能力。
 
-## Why
+## 为什么需要
 
-DevTools automation failures are rarely what they look like. The IDE HTTP port responds while the automation WebSocket silently listens on a different port. A preview QR opens a stale uploaded snapshot instead of your latest code. A page that renders perfectly in the simulator goes blank on a phone because of a browser-only global that isn't available in the mobile JavaScript runtime.
+开发者工具自动化失败往往不是表面看到的原因。IDE 的 HTTP 端口有响应，但自动化的 WebSocket 静默监听在另一个端口上。预览二维码打开的是旧的上传快照而不是最新代码。模拟器里完美渲染的页面在真机上白屏，因为某个浏览器专属全局对象在移动端 JS 运行时里不存在。
 
-This skill walks through the full diagnosis chain — port classification, protocol-level verification, native-layer blank screens, and mobile JS compatibility — before recommending a restart.
+这个 skill 走完整的诊断链——端口分类、协议级验证、原生层白屏、移动端 JS 兼容性——在建议重启之前就把根因找到。
 
-## Install
+## 安装
 
-### Option A — let your agent install it
+### 方式 A — 交给 agent 安装
 
-Give your agent this repo URL and ask it to add the skill:
+把仓库地址给你的 agent，让它安装：
 
 ```
 https://github.com/sabrina-fan/wechat-devtools-automation-recovery
 ```
 
-### Option B — manual
+### 方式 B — 手动安装
 
-Copy the `wechat-devtools-automation-recovery/` directory into your agent's skills folder (e.g. `~/.zcode/skills/`).
+把 `wechat-devtools-automation-recovery/` 目录复制到你的 agent skill 目录下（如 `~/.zcode/skills/`）。
 
-## Configuration
+## 配置
 
-- **DevTools CLI path**: auto-detected on macOS (`/Applications/wechatwebdevtools.app/Contents/MacOS/cli`); override by setting the path in your environment.
-- **Ports**: IDE HTTP defaults to `9420`, automation WebSocket defaults to `9422`. Both are auto-discovered via `lsof`.
-- **miniprogram-automator**: must be installed in the project or globally (`npm i miniprogram-automator`).
-- No API keys or credentials required.
+- **开发者工具 CLI 路径**：macOS 下自动检测（`/Applications/wechatwebdevtools.app/Contents/MacOS/cli`）；可在环境中覆盖。
+- **端口**：IDE HTTP 默认 `9420`，自动化 WebSocket 默认 `9422`，均通过 `lsof` 自动发现。
+- **miniprogram-automator**：需在项目或全局安装（`npm i miniprogram-automator`）。
+- 无需 API key 或凭据。
 
-## Usage
+## 使用方法
 
-Trigger it when automation fails to connect, times out, or a page renders in the simulator but goes blank on a real device. The skill will:
+当自动化连不上、超时、或模拟器渲染正常但真机白屏时触发。skill 会：
 
-1. Verify the artifact is current (clean caches, rebuild if needed).
-2. Classify the failure: IDE-HTTP vs automation-WebSocket port, stale QR, native-layer blank screen, or mobile JS compatibility.
-3. Start the right DevTools mode with the correct automation port.
-4. Run a protocol-level verification script (connect, navigate, evaluate, screenshot).
-5. Report evidence: port listeners, endpoint results, route, screenshot — without exposing tokens or credentials.
+1. 确认产物是最新的（清缓存、重新构建）。
+2. 分类故障：IDE HTTP 端口 vs 自动化 WebSocket 端口、旧二维码、原生层白屏、或移动端 JS 兼容性。
+3. 用正确的自动化端口启动开发者工具。
+4. 跑协议级验证脚本（连接、导航、求值、截图）。
+5. 上报证据：端口监听情况、端点结果、路由、截图——不泄露 token 或凭据。
 
-## Compatibility
+## 兼容性
 
-- **macOS** — primary platform (uses `lsof`, macOS DevTools CLI paths, Computer Use for GUI).
-- **Windows / Linux** — DevTools CLI path and process inspection commands differ; adapt the port-check commands to the local platform.
+- **macOS** — 主要平台（使用 `lsof`、macOS 开发者工具 CLI 路径、Computer Use 驱动 GUI）。
+- **Windows / Linux** — 开发者工具 CLI 路径和进程检查命令不同，需按平台适配端口检查命令。
 
-## Security & Boundary
+## 安全与边界
 
-This skill diagnoses and recovers automation/preview failures. It does not write or modify source code, debug business logic, or perform routine builds. It never logs tokens, cookies, signatures, user identifiers, or `.env` contents.
+这个 skill 诊断和恢复自动化/预览故障。不写或改源码、不调试业务逻辑、不做常规构建。绝不记录 token、cookie、签名、用户标识或 `.env` 内容。
