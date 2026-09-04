@@ -1,17 +1,49 @@
 # wechat-devtools-automation-recovery
 
-微信开发者工具自动化连不上、白屏、真机空白时的诊断与恢复 AI agent skill。
+Diagnose and recover WeChat Mini Program DevTools automation when the build is fine but the automator cannot connect, times out, or pages go blank on real devices.
 
-先清 file/compile 缓存重新编译再排查（不拿旧产物诊断）；先分类故障——别因自动化连不上就重启后端，要分清 IDE HTTP 端口（9420，会返回 404）和自动化 WebSocket 端口（9422），localhost/`[::1]`/127.0.0.1 三种回环都试；用 `miniprogram-automator` 做协议级验证（connect + reLaunch + evaluate + screenshot，全程带超时）。
+## Why
 
-覆盖：白屏但几何非零时查原生渲染层（page-container/video/map/canvas 可能盖住 Vue 节点）；真机空白但模拟器正常时查模块级浏览器全局（如 TextDecoder 在手机运行时不存在，要 feature-detect + 降级）；旧 QR 是旧快照，改完代码要重建生成新 QR；文件存储超限时先清 file 缓存重试再查调用方。证据上报不含 token/cookie/.env。
+DevTools automation failures are rarely what they look like. The IDE HTTP port responds while the automation WebSocket silently listens on a different port. A preview QR opens a stale uploaded snapshot instead of your latest code. A page that renders perfectly in the simulator goes blank on a phone because of a browser-only global that isn't available in the mobile JavaScript runtime.
 
-适用于任何微信小程序项目。
+This skill walks through the full diagnosis chain — port classification, protocol-level verification, native-layer blank screens, and mobile JS compatibility — before recommending a restart.
 
-## 安装
+## Install
 
-把 `SKILL.md` 复制到你的 agent skill 目录下即可。
+### Option A — let your agent install it
 
-## License
+Give your agent this repo URL and ask it to add the skill:
 
-MIT
+```
+https://github.com/sabrina-fan/wechat-devtools-automation-recovery
+```
+
+### Option B — manual
+
+Copy the `wechat-devtools-automation-recovery/` directory into your agent's skills folder (e.g. `~/.zcode/skills/`).
+
+## Configuration
+
+- **DevTools CLI path**: auto-detected on macOS (`/Applications/wechatwebdevtools.app/Contents/MacOS/cli`); override by setting the path in your environment.
+- **Ports**: IDE HTTP defaults to `9420`, automation WebSocket defaults to `9422`. Both are auto-discovered via `lsof`.
+- **miniprogram-automator**: must be installed in the project or globally (`npm i miniprogram-automator`).
+- No API keys or credentials required.
+
+## Usage
+
+Trigger it when automation fails to connect, times out, or a page renders in the simulator but goes blank on a real device. The skill will:
+
+1. Verify the artifact is current (clean caches, rebuild if needed).
+2. Classify the failure: IDE-HTTP vs automation-WebSocket port, stale QR, native-layer blank screen, or mobile JS compatibility.
+3. Start the right DevTools mode with the correct automation port.
+4. Run a protocol-level verification script (connect, navigate, evaluate, screenshot).
+5. Report evidence: port listeners, endpoint results, route, screenshot — without exposing tokens or credentials.
+
+## Compatibility
+
+- **macOS** — primary platform (uses `lsof`, macOS DevTools CLI paths, Computer Use for GUI).
+- **Windows / Linux** — DevTools CLI path and process inspection commands differ; adapt the port-check commands to the local platform.
+
+## Security & Boundary
+
+This skill diagnoses and recovers automation/preview failures. It does not write or modify source code, debug business logic, or perform routine builds. It never logs tokens, cookies, signatures, user identifiers, or `.env` contents.
