@@ -1,6 +1,6 @@
 ---
 name: wechat-devtools-automation-recovery
-description: Diagnose and recover WeChat Mini Program DevTools automation, preview, and real-device verification when the build exists but automation cannot connect, times out, or reports "target project window is not opened with automation enabled", or when a page renders in the simulator but goes blank on a real device. Use for any "自动化连不上", timeout, white/blank screen, stale preview QR, or simulator file-storage error — before restarting anything. Covers IDE-HTTP vs automation-WebSocket port classification, protocol-level verification with miniprogram-automator, native-layer blank screens, and mobile JavaScript compatibility. Use for any WeChat Mini Program project.
+description: Diagnose and recover WeChat Mini Program DevTools automation, preview, and real-device verification. Use when the build exists but automation cannot connect, times out, or reports "target project window is not opened with automation enabled", or when a page renders in the simulator but goes blank on a real device — covering "自动化连不上", timeout, white/blank screen, stale preview QR, and simulator file-storage errors. Do not use for writing or modifying mini-program source code, business-logic debugging, or routine builds without an automation or rendering failure to recover from.
 ---
 
 # WeChat DevTools automation recovery
